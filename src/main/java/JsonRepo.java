@@ -21,52 +21,44 @@ public class JsonRepo {
         JSONObject data = new JSONObject();
 
         try {
-           data = (JSONObject) parser.parse(new FileReader(filename));
+            data = (JSONObject) parser.parse(new FileReader(filename));
 
         } catch (IOException | ParseException e) {
-            e.printStackTrace();
+            System.err.println("Error on File Read");
         }
         return data;
     }
 
-    private void printkeyExists(Object key) {
+    private void printkeyExists(String key) {
         if (this.repositorio.get(key) == null)
-            System.out.println("Key doesn't exist");
+            System.out.println("Key Doesn't Exist on Local");
         else
-            System.out.println("Key-Value exists!");
+            System.out.println("Key Exists on Local");
     }
 
 
-    public Object get(Object key) {
-        System.out.println(" ------------- JsonRepo.GET ------------- ");
+    public Object get(String key) {
         this.printkeyExists(key);
 
         return this.repositorio.get(key);
     }
 
-    public void set(Object key, Object value){
-        System.out.println(" ------------- JsonRepo.SET ------------- ");
-        printkeyExists(key);
-
-        this.repositorio.put(key, value);
-        FileWriter writer = null;
-
+    public void set(String key, String value){
         try {
+            printkeyExists(key);
+            this.repositorio.put(key, value);
+            FileWriter writer = null;
             writer = new FileWriter(this.filename);
             writer.write(this.repositorio.toJSONString());
-
-            System.out.println("Contents written in JSON file.");
-
             writer.flush();
             writer.close();
 
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Error on File Write JsonRepo.set");
         }
     }
 
     public void rem(Object key){
-
         this.repositorio.remove(key);
         FileWriter writer = null;
 
@@ -74,27 +66,31 @@ public class JsonRepo {
             writer = new FileWriter(this.filename);
             writer.write(this.repositorio.toJSONString());
 
-            System.out.println("Contents written in JSON file.");
-
             writer.flush();
             writer.close();
 
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Error on File Write JsonRepo.rem");
         }
     }
 
-
-
-
-
-    public static void main(String[] args){
-        JsonRepo m = new JsonRepo("info.json");
-        m.get("88");
-        m.set("45149", "lindinho yamininho");
-        m.set("92a", "poop");
-        m.rem("92a");
+    public boolean contains(String key){
+        return repositorio.containsKey(key);
     }
+
+    public void writeToFile(){
+        try {
+            FileWriter writer = null;
+            writer = new FileWriter(this.filename);
+            writer.write(this.repositorio.toJSONString());
+            writer.flush();
+            writer.close();
+
+        } catch (IOException e) {
+            System.err.println("Error on WriteToFile");
+        }
+    }
+
 }
 
 

@@ -59,43 +59,43 @@ public class MessageListener implements AdvancedMessageListener {
 
     @Override
     public void membershipMessageReceived(SpreadMessage spreadMessage) {
-        if(spreadMessage.isMembership()) {
-            MembershipInfo info = spreadMessage.getMembershipInfo();
 
-            if(info.isCausedByJoin() && CheckSameSender(info.getJoined())){
+        MembershipInfo info = spreadMessage.getMembershipInfo();
 
-                System.out.println("Added " + info.getJoined() + " to Repo");
-                serverRepo.put(info.getJoined(), new MsgData());
-            }
-            else if(info.isCausedByLeave() && CheckSameSender(info.getLeft())){
-                System.out.println("Removed " + info.getLeft() + " From Repo");
-                serverRepo.remove(info.getLeft());
+        if(info.isCausedByJoin() && CheckSameSender(info.getJoined())){
 
-                removeInactiveClients(info);
-            }
-
-            else if(info.isCausedByDisconnect() && CheckSameSender(info.getDisconnected())){
-
-                System.out.println("Removed " + info.getDisconnected() + " From Repo");
-                serverRepo.remove(info.getDisconnected());
-
-                removeInactiveClients(info);
-
-                /**
-                 * ver qual cliente usa este servidor e
-                 * mudar o spreadgroup para o base
-                 */
-            }else{
-                ArrayList<SpreadGroup> arr = new ArrayList<>(Arrays.asList(info.getMembers()));
-
-                for(SpreadGroup sg : arr){
-                    if(! (sg.equals(spreadConn.getPrivateGroup())))
-                        serverRepo.put(sg, new MsgData());
-                }
-                if(arr.size() > 1)
-                    this.sendSpreadmsgOBJ(spreadMessage.getSender(), MsgType.CONFIG_REQ);
-            }
+            System.out.println("Added " + info.getJoined() + " to Repo");
+            serverRepo.put(info.getJoined(), new MsgData());
         }
+        else if(info.isCausedByLeave() && CheckSameSender(info.getLeft())){
+            System.out.println("Removed " + info.getLeft() + " From Repo");
+            serverRepo.remove(info.getLeft());
+
+            removeInactiveClients(info);
+        }
+
+        else if(info.isCausedByDisconnect() && CheckSameSender(info.getDisconnected())){
+
+            System.out.println("Removed " + info.getDisconnected() + " From Repo");
+            serverRepo.remove(info.getDisconnected());
+
+            removeInactiveClients(info);
+
+            /**
+             * ver qual cliente usa este servidor e
+             * mudar o spreadgroup para o base
+             */
+        }else{
+            ArrayList<SpreadGroup> arr = new ArrayList<>(Arrays.asList(info.getMembers()));
+
+            for(SpreadGroup sg : arr){
+                if(! (sg.equals(spreadConn.getPrivateGroup())))
+                    serverRepo.put(sg, new MsgData());
+            }
+            if(arr.size() > 1)
+                this.sendSpreadmsgOBJ(spreadMessage.getSender(), MsgType.CONFIG_REQ);
+        }
+
 
         System.out.println("Servidores Atuais : ");
         for(SpreadGroup sg : serverRepo.keySet())
