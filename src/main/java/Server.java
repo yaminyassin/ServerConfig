@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashMap;
+import java.util.Scanner;
 
 import io.grpc.stub.StreamObserver;
 import rpcstubs.Resposta;
@@ -55,17 +56,16 @@ public class Server{
             msgHandling = new MessageListener(this.configService);
             spreadConn.add(msgHandling);
 
-
             joingSpreadGroup(configGroup);
-        }
-        catch(SpreadException e)  {
-            System.err.println("There was an error connecting to the daemon.");
-            e.printStackTrace();
+
+        } catch(SpreadException e)  {
+            System.err.println("Error Connecting to Daemon.");
             System.exit(1);
         }
         catch(UnknownHostException e) {
-            System.err.println("Can't find the daemon " + this.spreadIP);
+            System.err.println("Can't Find Daemon, Unkown Host " + this.spreadIP);
             System.exit(1);
+
         } catch (IOException e) {
             System.err.println("Can't Start Grcp Server " + this.grcpPort);
             System.exit(1);
@@ -75,20 +75,18 @@ public class Server{
 
     private void joingSpreadGroup(String name){
         SpreadGroup group = new SpreadGroup();
-
         try {
             group.join(spreadConn, name);
-
         } catch (SpreadException e) {
-            e.printStackTrace();
-            System.err.println("Failed to join Group, " + name);
+            System.err.println("Failed Joining SpreadGroup " + name);
         }
     }
 
 
     public void shutdownServers(){
-        // shutdown and quit
         try {
+            Scanner sc = new Scanner(System.in);
+            sc.nextLine();
 
             grcpServer.awaitTermination();
             grcpServer.shutdown();
@@ -96,17 +94,13 @@ public class Server{
             spreadConn.remove(msgHandling);
             spreadConn.disconnect();
         } catch (SpreadException | InterruptedException e) {
-            System.err.println("error disconnecting spread server ");
-            e.printStackTrace();
+            System.err.println("Error on Spread Shutdown \n");
         }
         System.exit(0);
     }
 
 
-
     public static void main(String[] args) {
         Server server = new Server(args);
-
-
     }
 }

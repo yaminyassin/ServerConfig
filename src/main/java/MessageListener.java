@@ -27,14 +27,11 @@ public class MessageListener implements AdvancedMessageListener {
         try {
             String msg = spreadMessage.getSender().toString();
 
-            if(spreadConn.getPrivateGroup().toString().equals(msg)){
-                System.out.println("Same sender... Ignoring");
-            }
-            else {
+            if( ! spreadConn.getPrivateGroup().toString().equals(msg) ){
                 MsgData obj = (MsgData) spreadMessage.getObject();
 
-                if (obj.msgType == MsgType.SENTCONFIG) {
-                    System.out.println("GOT SERVER DATA FROM -> " + msg);
+                if (obj.msgType == MsgType.CONFIG_RES) {
+                    System.out.println("Recieved CONFIG_RES From: " + msg + "\n" );
                     SpreadGroup group = spreadMessage.getSender();
 
                     if (serverRepo.containsKey(group))
@@ -42,10 +39,13 @@ public class MessageListener implements AdvancedMessageListener {
                     else
                         serverRepo.put(group, obj);
 
+                    /*
+                    verificar todos clientes que nao tem servidor ativo
+                    e enviar um novo servidor.
+                    */
                     for(StreamObserver<Resposta> client : clientRepo.keySet()){
-
                         if( clientRepo.get(client).equals(spreadConn.getPrivateGroup())
-                                &&  !serverRepo.containsKey(clientRepo.get(client)) )
+                        && ! serverRepo.containsKey(clientRepo.get(client)) )
                             configService.getRandomServer(client);
                     }
                 }
@@ -59,35 +59,32 @@ public class MessageListener implements AdvancedMessageListener {
 
     @Override
     public void membershipMessageReceived(SpreadMessage spreadMessage) {
-        System.out.println("Recieved membership");
-
         if(spreadMessage.isMembership()) {
             MembershipInfo info = spreadMessage.getMembershipInfo();
 
             if(info.isCausedByJoin() && CheckSameSender(info.getJoined())){
 
-                System.out.println("Added " + info.getJoined() + "to repo");
+                System.out.println("Added " + info.getJoined() + " to Repo");
                 serverRepo.put(info.getJoined(), new MsgData());
             }
             else if(info.isCausedByLeave() && CheckSameSender(info.getLeft())){
-                System.out.println("Removed " + info.getLeft() + "to repo");
+                System.out.println("Removed " + info.getLeft() + " From Repo");
                 serverRepo.remove(info.getLeft());
 
-                resetClientUsingDisconnectedServer(info);
+                removeInactiveClients(info);
             }
 
             else if(info.isCausedByDisconnect() && CheckSameSender(info.getDisconnected())){
 
-                System.out.println("Removed " + info.getDisconnected() + "to repo");
+                System.out.println("Removed " + info.getDisconnected() + " From Repo");
                 serverRepo.remove(info.getDisconnected());
 
-                resetClientUsingDisconnectedServer(info);
+                removeInactiveClients(info);
 
                 /**
                  * ver qual cliente usa este servidor e
                  * mudar o spreadgroup para o base
                  */
-
             }else{
                 ArrayList<SpreadGroup> arr = new ArrayList<>(Arrays.asList(info.getMembers()));
 
@@ -96,31 +93,30 @@ public class MessageListener implements AdvancedMessageListener {
                         serverRepo.put(sg, new MsgData());
                 }
                 if(arr.size() > 1)
-                    this.sendSpreadmsgOBJ(spreadMessage.getSender(), MsgType.REQCONFIG);
+                    this.sendSpreadmsgOBJ(spreadMessage.getSender(), MsgType.CONFIG_REQ);
             }
         }
 
-        System.out.println("REPOSITORIO ATUAL : ");
+        System.out.println("Servidores Atuais : ");
         for(SpreadGroup sg : serverRepo.keySet())
             System.out.println(sg);
 
-        clearDisconnectedClients(spreadMessage.getMembershipInfo());
-
-        PrintMessages.printMembershipInfo(spreadMessage.getMembershipInfo());
     }
 
-    public void resetClientUsingDisconnectedServer(MembershipInfo info){
+    /*
+    Este metodo remove Clientes que nao estao ativos,
+    pois sempre que o cliente acaba de escrever ou ler
+    ele fecha a ligacao e pede um novo server ao configServer
+     */
+    public void removeInactiveClients(MembershipInfo info){
         for(StreamObserver<Resposta> client : clientRepo.keySet()){
-            if( clientRepo.get(client).equals(info.getDisconnected()) )
-                configService.getRandomServer(client);
+            if( clientRepo.get(client).equals(info.getDisconnected()) ) {
+                clientRepo.remove(client);
+            }
         }
-    }
-
-    public void clearDisconnectedClients(MembershipInfo info){
-        for(StreamObserver<Resposta> client : clientRepo.keySet() ){
-            if( clientRepo.get(client).equals(info.getDisconnected()) )
-            clientRepo.remove(client);
-        }
+        System.out.println("Remaining Clients: ");
+        for(StreamObserver<Resposta> client : clientRepo.keySet())
+            System.out.println(client);
     }
 
 

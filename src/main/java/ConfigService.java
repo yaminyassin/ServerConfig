@@ -27,7 +27,6 @@ public class ConfigService extends ConfigServiceGrpc.ConfigServiceImplBase {
 
     @Override
     public void getClusterInfo(Empty request, StreamObserver<Resposta> responseObserver) {
-        System.out.println("------------- getClusterInfo---------- ");
 
         getRandomServer(responseObserver);
     }
@@ -43,7 +42,7 @@ public class ConfigService extends ConfigServiceGrpc.ConfigServiceImplBase {
 
         ArrayList<SpreadGroup> arr = new ArrayList<>(serverRepo.keySet());
 
-        if(arr.size() > 0){ //se houver Servidores Disponíveis
+        if(arr.size() > 0){ //se houver servidores disponíveis, escolhe um aleatorio
 
             SpreadGroup picked = arr.get(randomPicker.nextInt(serverRepo.size()));
 
@@ -63,25 +62,28 @@ public class ConfigService extends ConfigServiceGrpc.ConfigServiceImplBase {
                     .newBuilder()
                     .setServerInfo(serverInfo).build();
 
-
-            System.out.println("SENT SERVER DETAILS: ");
+            System.out.println("Sent Server Details ");
             System.out.println("IP: " + msg.key);
-            System.out.println("PORT: " + msg.value);
+            System.out.println("PORT: " + msg.value + "\n");
 
             responseObserver.onNext(resposta);
         }
-        else{  //se nao houver Servidores Disponiveis
+        else{
+            /*
+            se nao ha servidores disponiveis,
+             insere cliente na lista de clientes
+             */
 
-            //insere cliente na lista de clientes
             clientRepo.put(responseObserver, spreadConn.getPrivateGroup());
 
             Empty empty = rpcstubs.Empty.newBuilder().build();
+
             Resposta resposta = Resposta
                     .newBuilder()
                     .setEmpty(empty)
                     .build();
 
-            System.out.println("NO SERVERS AVALIABLE ON REPO, INSERTING CLIENT ON WAITLIST");
+            System.out.println("No Server Availabe, Client on Waiting List \n");
 
             responseObserver.onNext(resposta);
         }
