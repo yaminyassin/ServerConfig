@@ -127,11 +127,14 @@ public class MessageListener implements AdvancedMessageListener {
 
     public void sendSpreadmsgOBJ(SpreadGroup group, MsgType msgType) {
         try {
-            SpreadMessage msg = new SpreadMessage();
-            msg.setSafe();
+            MsgData data = new MsgData();
+            data.setMsgType(msgType);
 
+            SpreadMessage msg = new SpreadMessage();
+
+            msg.setSafe();
             msg.addGroup(group);
-            msg.setObject(new MsgData(msgType, "key", "value"));
+            msg.setObject(data);
 
             spreadConn.multicast(msg);
 

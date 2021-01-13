@@ -89,8 +89,6 @@ public class ConfigService extends ConfigServiceGrpc.ConfigServiceImplBase {
         }
     }
 
-
-
     public HashMap<SpreadGroup, MsgData> getServerRepo() {
         return serverRepo;
     }
