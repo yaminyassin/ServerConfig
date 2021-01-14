@@ -1,4 +1,4 @@
-package ConfigServer;
+package Server;
 
 import io.grpc.ServerBuilder;
 import java.io.IOException;
@@ -12,7 +12,7 @@ import rpcstubs.Resposta;
 import spread.*;
 
 
-public class Server{
+public class ConfigServer {
 
     private HashMap<SpreadGroup, MsgData> ServerRepo = new HashMap<>();
     private HashMap<StreamObserver<Resposta>, SpreadGroup> clientRepo = new HashMap<>();
@@ -26,7 +26,7 @@ public class Server{
     private SpreadConnection spreadConn;
     private MessageListener msgHandling;
 
-    public Server(String[] args){
+    public ConfigServer(String[] args){
         if(args.length > 0){
             this.spreadIP = args[0];
         }
@@ -103,6 +103,6 @@ public class Server{
 
 
     public static void main(String[] args) {
-        Server server = new Server(args);
+        ConfigServer server = new ConfigServer(args);
     }
 }

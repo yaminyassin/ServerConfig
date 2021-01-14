@@ -1,11 +1,8 @@
-package ConfigServer;
+package Server;
 
 import spread.MembershipInfo;
 import spread.SpreadGroup;
 import spread.SpreadMessage;
-
-import java.io.ByteArrayInputStream;
-import java.io.ObjectInputStream;
 
 public  class  PrintMessages {
 

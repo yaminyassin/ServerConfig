@@ -1,4 +1,4 @@
-package ConfigServer;
+package Server;
 
 import java.io.Serializable;
 

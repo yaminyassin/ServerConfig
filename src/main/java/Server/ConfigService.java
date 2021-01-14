@@ -1,4 +1,4 @@
-package ConfigServer;
+package Server;
 
 import io.grpc.stub.StreamObserver;
 import rpcstubs.Empty;
