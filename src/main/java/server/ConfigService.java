@@ -1,5 +1,6 @@
 package server;
 
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import rpcstubs.Empty;
 import rpcstubs.*;
@@ -76,12 +77,19 @@ public class ConfigService extends ConfigServiceGrpc.ConfigServiceImplBase {
         System.out.println("Sent ConfigServer.Server Details ");
         System.out.println("IP: " + msg.key);
         System.out.println("PORT: " + msg.value + "\n");
+        try{
+            client.onNext(resposta);
+        }catch (StatusRuntimeException e){
+            System.err.println("Erro on SendServer Method");
+        }
 
-        client.onNext(resposta);
     }
 
     public void addToWaitlist(StreamObserver<Resposta> client){
-        clientRepo.put(client, spreadConn.getPrivateGroup());
+        if(clientRepo.containsKey(client))
+            clientRepo.replace(client, spreadConn.getPrivateGroup());
+        else
+            clientRepo.put(client, spreadConn.getPrivateGroup());
 
         Empty empty = rpcstubs.Empty.newBuilder().build();
 

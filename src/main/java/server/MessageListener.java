@@ -5,6 +5,7 @@ import rpcstubs.Resposta;
 import spread.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 
 
@@ -108,11 +109,17 @@ public class MessageListener implements AdvancedMessageListener {
     ele fecha a ligacao e pede um novo server ao configServer
      */
     public void removeInactiveClients(MembershipInfo info){
-        for(StreamObserver<Resposta> client : clientRepo.keySet()){
-            if( clientRepo.get(client).equals(info.getDisconnected()) ) {
-                clientRepo.remove(client);
+        try{
+            for(StreamObserver<Resposta> client : clientRepo.keySet()){
+                if( clientRepo.get(client).equals(info.getDisconnected()) ) {
+                    client.onCompleted();
+                    clientRepo.remove(client);
+                }
             }
+        }catch (ConcurrentModificationException e){
+            System.err.println("removed clients using disconected server");
         }
+
         System.out.println("Remaining Clients: ");
         for(StreamObserver<Resposta> client : clientRepo.keySet())
             System.out.println(client);

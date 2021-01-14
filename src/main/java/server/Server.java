@@ -17,7 +17,7 @@ public class Server {
     private HashMap<SpreadGroup, MsgData> ServerRepo = new HashMap<>();
     private HashMap<StreamObserver<Resposta>, SpreadGroup> clientRepo = new HashMap<>();
 
-    private final int grcpPort = 5050;
+    private int grcpPort = 5050;
     private ConfigService configService;
     private io.grpc.Server grcpServer;
 
@@ -29,10 +29,10 @@ public class Server {
     public Server(String[] args){
         if(args.length > 0){
             this.spreadIP = args[0];
+            this.grcpPort = Integer.parseInt(args[1]);
         }
         this.startServers();
         this.shutdownServers();
-
     }
 
     private void startServers(){
