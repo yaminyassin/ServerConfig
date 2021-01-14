@@ -12,7 +12,7 @@ import rpcstubs.Resposta;
 import spread.*;
 
 
-public class ConfigServer {
+public class Server {
 
     private HashMap<SpreadGroup, MsgData> ServerRepo = new HashMap<>();
     private HashMap<StreamObserver<Resposta>, SpreadGroup> clientRepo = new HashMap<>();
@@ -26,7 +26,7 @@ public class ConfigServer {
     private SpreadConnection spreadConn;
     private MessageListener msgHandling;
 
-    public ConfigServer(String[] args){
+    public Server(String[] args){
         if(args.length > 0){
             this.spreadIP = args[0];
         }
@@ -103,6 +103,6 @@ public class ConfigServer {
 
 
     public static void main(String[] args) {
-        ConfigServer server = new ConfigServer(args);
+        Server server = new Server(args);
     }
 }
