@@ -1,3 +1,5 @@
+package ConfigServer;
+
 import io.grpc.ServerBuilder;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -67,7 +69,7 @@ public class Server{
             System.exit(1);
 
         } catch (IOException e) {
-            System.err.println("Can't Start Grcp Server " + this.grcpPort);
+            System.err.println("Can't Start Grcp ConfigServer.Server " + this.grcpPort);
             System.exit(1);
         }
     }

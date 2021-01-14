@@ -1,17 +1,33 @@
+package ConfigServer;
+
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+
+import java.io.*;
 
 
-public class JsonRepo {
+public class JsonRepo implements Serializable {
 
     private final String filename;
     private JSONObject repositorio;
-
+    private File file;
     public JsonRepo(String filename) {
+
+        try {
+            file = new File(filename);
+            if(file.exists()){
+                System.out.println("file exists! \n");
+            }else{
+                FileWriter wr = new FileWriter(filename);
+                wr.write("{}");
+                wr.close();
+            }
+
+        } catch (IOException e) {
+            System.err.println("Coudn't create file");
+        }
+
         this.filename = filename;
         this.repositorio = (JSONObject)readFile(this.filename);
     }
@@ -19,8 +35,9 @@ public class JsonRepo {
     private Object readFile(String filename){
         JSONParser parser = new JSONParser();
         JSONObject data = new JSONObject();
-
         try {
+
+
             data = (JSONObject) parser.parse(new FileReader(filename));
 
         } catch (IOException | ParseException e) {
@@ -54,7 +71,7 @@ public class JsonRepo {
             writer.close();
 
         } catch (IOException e) {
-            System.err.println("Error on File Write JsonRepo.set");
+            System.err.println("Error on File Write server.ConfigServer.JsonRepo.set");
         }
     }
 
@@ -70,7 +87,7 @@ public class JsonRepo {
             writer.close();
 
         } catch (IOException e) {
-            System.err.println("Error on File Write JsonRepo.rem");
+            System.err.println("Error on File Write server.ConfigServer.JsonRepo.rem");
         }
     }
 

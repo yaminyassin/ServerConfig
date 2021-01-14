@@ -1,7 +1,8 @@
+package ConfigServer;
+
 import io.grpc.stub.StreamObserver;
 import rpcstubs.Resposta;
 import spread.*;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -81,19 +82,17 @@ public class MessageListener implements AdvancedMessageListener {
 
             removeInactiveClients(info);
 
-            /**
-             * ver qual cliente usa este servidor e
-             * mudar o spreadgroup para o base
-             */
         }else{
             ArrayList<SpreadGroup> arr = new ArrayList<>(Arrays.asList(info.getMembers()));
 
             for(SpreadGroup sg : arr){
-                if(! (sg.equals(spreadConn.getPrivateGroup())))
+                if(! (sg.equals(spreadConn.getPrivateGroup()))){
                     serverRepo.put(sg, new MsgData());
+                    this.sendSpreadmsgOBJ(sg, MsgType.CONFIG_REQ);
+                }
             }
-            if(arr.size() > 1)
-                this.sendSpreadmsgOBJ(spreadMessage.getSender(), MsgType.CONFIG_REQ);
+
+
         }
 
 
@@ -139,7 +138,7 @@ public class MessageListener implements AdvancedMessageListener {
             spreadConn.multicast(msg);
 
         } catch (SpreadException e) {
-            System.err.println("Error on MessageListener.sendSpreadmsgOBJ");
+            System.err.println("Error on ConfigServer.MessageListener.sendSpreadmsgOBJ");
         }
     }
 }

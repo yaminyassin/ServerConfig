@@ -1,3 +1,5 @@
+package ConfigServer;
+
 import java.io.Serializable;
 
 public class MsgData implements Serializable {

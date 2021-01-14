@@ -1,3 +1,5 @@
+package ConfigServer;
+
 import spread.MembershipInfo;
 import spread.SpreadGroup;
 import spread.SpreadMessage;

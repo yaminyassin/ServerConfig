@@ -1,3 +1,5 @@
+package ConfigServer;
+
 import io.grpc.stub.StreamObserver;
 import rpcstubs.Empty;
 import rpcstubs.*;
@@ -45,48 +47,52 @@ public class ConfigService extends ConfigServiceGrpc.ConfigServiceImplBase {
         if(arr.size() > 0){ //se houver servidores disponíveis, escolhe um aleatorio
 
             SpreadGroup picked = arr.get(randomPicker.nextInt(serverRepo.size()));
-
-            if(clientRepo.containsKey(responseObserver))
-                clientRepo.replace(responseObserver, picked);
-            else
-                clientRepo.put(responseObserver, picked);
-
-            MsgData msg = serverRepo.get(picked);
-
-            ServerInfo serverInfo= ServerInfo
-                    .newBuilder()
-                    .setIp(msg.key)
-                    .setPort(Integer.parseInt(msg.value)).build();
-
-            Resposta resposta = Resposta
-                    .newBuilder()
-                    .setServerInfo(serverInfo).build();
-
-            System.out.println("Sent Server Details ");
-            System.out.println("IP: " + msg.key);
-            System.out.println("PORT: " + msg.value + "\n");
-
-            responseObserver.onNext(resposta);
+            sendServer(responseObserver, picked);
         }
         else{
-            /*
-            se nao ha servidores disponiveis,
-             insere cliente na lista de clientes
-             */
-
-            clientRepo.put(responseObserver, spreadConn.getPrivateGroup());
-
-            Empty empty = rpcstubs.Empty.newBuilder().build();
-
-            Resposta resposta = Resposta
-                    .newBuilder()
-                    .setEmpty(empty)
-                    .build();
-
-            System.out.println("No Server Availabe, Client on Waiting List \n");
-
-            responseObserver.onNext(resposta);
+            /* se nao ha servidores disponiveis, insere cliente na lista de clientes */
+            addToWaitlist(responseObserver);
         }
+    }
+
+    public void sendServer(StreamObserver<Resposta> client, SpreadGroup group){
+
+        if(clientRepo.containsKey(client))
+            clientRepo.replace(client, group);
+        else
+            clientRepo.put(client, group);
+
+        MsgData msg = serverRepo.get(group);
+
+        ServerInfo serverInfo= ServerInfo
+                .newBuilder()
+                .setIp(msg.key)
+                .setPort(Integer.parseInt(msg.value)).build();
+
+        Resposta resposta = Resposta
+                .newBuilder()
+                .setServerInfo(serverInfo).build();
+
+        System.out.println("Sent ConfigServer.Server Details ");
+        System.out.println("IP: " + msg.key);
+        System.out.println("PORT: " + msg.value + "\n");
+
+        client.onNext(resposta);
+    }
+
+    public void addToWaitlist(StreamObserver<Resposta> client){
+        clientRepo.put(client, spreadConn.getPrivateGroup());
+
+        Empty empty = rpcstubs.Empty.newBuilder().build();
+
+        Resposta resposta = Resposta
+                .newBuilder()
+                .setEmpty(empty)
+                .build();
+
+        System.out.println("No ConfigServer.Server Availabe, Client on Waiting List \n");
+
+        client.onNext(resposta);
     }
 
     public HashMap<SpreadGroup, MsgData> getServerRepo() {
