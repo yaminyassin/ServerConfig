@@ -1,4 +1,4 @@
-package Server;
+package server;
 
 import spread.MembershipInfo;
 import spread.SpreadGroup;
